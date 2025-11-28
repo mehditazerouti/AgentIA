@@ -1,8 +1,4 @@
-C'est la touche finale indispensable pour rendre ton projet professionnel. Un bon `README.md` montre que tu maîtrises ton environnement de déploiement.
-
-Voici un fichier `README.md` complet, structuré et formaté. Tu peux copier-coller ce contenu directement dans un fichier texte nommé **`README.md`** à la racine de ton projet.
-
-***
+MEHDI TAZEROUTI MASTER 2 MIAGE PARIS DAUPHINE 
 
 # 🤖 Agent IA de Réservation Intelligent (Architecture BDI)
 
