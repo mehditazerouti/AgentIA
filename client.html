@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA Booking Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .chat-scroll::-webkit-scrollbar { width: 6px; }
+        .chat-scroll::-webkit-scrollbar-thumb { background-color: #4b5563; border-radius: 20px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-enter { animation: fadeIn 0.5s ease-out forwards; }
+        .highlight-pulse { animation: pulseOrange 2s infinite; }
+        @keyframes pulseOrange { 0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(234, 179, 8, 0); } 100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); } }
+        /* Style pour le texte gras dans le chat */
+        .chat-content b, .chat-content strong { color: #60a5fa; font-weight: 700; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200 min-h-screen relative font-sans overflow-x-hidden">
+
+    <!-- HEADER -->
+    <nav class="p-6 flex justify-between items-center max-w-7xl mx-auto w-full z-10 relative">
+        <div class="flex items-center gap-2 cursor-pointer" onclick="showHome()">
+            <div class="bg-blue-600 p-2 rounded-lg"><i data-lucide="brain-circuit" class="w-6 h-6 text-white"></i></div>
+            <span class="font-bold text-xl text-white">Agent IA</span>
+        </div>
+        <button onclick="toggleForm()" class="text-sm text-slate-400 hover:text-white transition border border-slate-700 px-4 py-2 rounded-full flex items-center gap-2">
+            <i data-lucide="layout" class="w-4 h-4"></i> Changer Vue
+        </button>
+    </nav>
+
+    <!-- CONTAINER PRINCIPAL -->
+    <div class="relative min-h-[80vh]">
+        
+        <!-- ACCUEIL -->
+        <div id="homeSection" class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center transition-all duration-500 transform translate-x-0 opacity-100">
+            <h1 class="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-6 animate-enter">
+                Réservation <br> Intelligente
+            </h1>
+            <p class="text-slate-400 text-xl max-w-2xl mb-10 animate-enter" style="animation-delay: 0.1s">
+                L'assistant qui négocie les créneaux pour vous.<br>
+                <span class="text-sm text-slate-500">"Je suis complet à 20h, je vous propose 20h30 ?"</span>
+            </p>
+            <div class="flex gap-4 flex-col sm:flex-row animate-enter" style="animation-delay: 0.2s">
+                <button onclick="toggleChat(true)" class="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-bold shadow-lg shadow-blue-600/30 transition transform hover:scale-105 flex items-center gap-2 justify-center">
+                    <i data-lucide="message-circle" class="w-5 h-5"></i> Parler à l'IA
+                </button>
+                <button onclick="showFormView()" class="px-8 py-4 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-white rounded-full font-bold transition flex items-center gap-2 justify-center">
+                    <i data-lucide="calendar" class="w-5 h-5"></i> Formulaire
+                </button>
+            </div>
+        </div>
+
+        <!-- FORMULAIRE -->
+        <div id="formSection" class="absolute inset-0 flex items-center justify-center p-4 transition-all duration-500 transform translate-x-full opacity-0 pointer-events-none">
+            <div class="bg-slate-800/90 border border-slate-700 rounded-2xl shadow-2xl p-8 max-w-2xl w-full backdrop-blur-sm">
+                <div class="flex items-center gap-3 mb-6 border-b border-slate-700 pb-4">
+                    <i data-lucide="calendar-check" class="w-6 h-6 text-blue-400"></i>
+                    <h2 class="text-2xl font-bold text-white">Réservation Manuelle</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Date</label>
+                        <input type="date" id="dateInput" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none mt-1">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase ml-1">Créneau</label>
+                        <select id="timeInput" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none mt-1 transition-all duration-300">
+                            <option>Chargement...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-5 mb-5">
+                    <input type="text" id="firstname" placeholder="Prénom" class="bg-slate-900 border border-slate-600 rounded-xl p-3 text-white outline-none">
+                    <input type="email" id="email" placeholder="Email" class="bg-slate-900 border border-slate-600 rounded-xl p-3 text-white outline-none">
+                </div>
+                <button onclick="book()" id="submitBtn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg transition flex justify-center items-center gap-2">
+                    <span>Confirmer</span> <i data-lucide="check" class="w-5 h-5"></i>
+                </button>
+                <div id="formFeedback" class="mt-4 p-4 rounded-xl hidden text-sm transition-all chat-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHATBOT -->
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <div id="chatWindow" class="hidden bg-slate-800 border border-slate-600 w-80 h-[450px] rounded-2xl shadow-2xl flex flex-col mb-4 overflow-hidden">
+            <div class="bg-blue-600 p-4 flex justify-between items-center">
+                <span class="font-bold text-white flex items-center gap-2"><i data-lucide="bot" class="w-5 h-5"></i> Assistant IA</span>
+                <button onclick="toggleChat()" class="text-blue-200 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto chat-scroll space-y-3 bg-slate-900/50">
+                <div class="flex items-start gap-2">
+                    <div class="bg-slate-700 p-3 rounded-tr-xl rounded-br-xl rounded-bl-xl text-sm text-slate-200">
+                        Bonjour ! Je suis votre assistant.<br>
+                        Dites-moi : <b>"le 5 a 20h par exemple ou le 5/12/2025 ..."</b>.
+                    </div>
+                </div>
+            </div>
+            <div class="p-3 bg-slate-800 border-t border-slate-700 flex gap-2">
+                <input type="text" id="chatInput" placeholder="Écrivez ici..." class="flex-1 bg-slate-900 border border-slate-600 text-white text-sm rounded-lg px-3 focus:outline-none focus:border-blue-500" onkeypress="handleEnter(event)">
+                <button onclick="sendMessage()" class="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-lg transition"><i data-lucide="send" class="w-4 h-4"></i></button>
+            </div>
+        </div>
+        <button onclick="toggleChat()" class="bg-blue-600 hover:bg-blue-500 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition hover:scale-110">
+            <i data-lucide="message-square" class="w-7 h-7"></i>
+        </button>
+    </div>
+
+    <script>
+        const API = 'http://127.0.0.1:8000/api';
+        const CLIENT_ID = 'client_' + Math.random().toString(36).substr(2, 9);
+        
+        // Navigation
+        const homeSec = document.getElementById('homeSection');
+        const formSec = document.getElementById('formSection');
+        function showHome() {
+            homeSec.classList.remove('translate-x-[-100%]', 'opacity-0'); homeSec.classList.add('translate-x-0', 'opacity-100');
+            formSec.classList.remove('translate-x-0', 'opacity-100', 'pointer-events-auto'); formSec.classList.add('translate-x-full', 'opacity-0', 'pointer-events-none');
+        }
+        function showFormView() {
+            homeSec.classList.remove('translate-x-0', 'opacity-100'); homeSec.classList.add('translate-x-[-100%]', 'opacity-0');
+            formSec.classList.remove('translate-x-full', 'opacity-0', 'pointer-events-none'); formSec.classList.add('translate-x-0', 'opacity-100', 'pointer-events-auto');
+            loadSlots();
+        }
+        function toggleForm() { if (formSec.classList.contains('opacity-0')) showFormView(); else showHome(); }
+
+        // Form Logic
+        const dateInput = document.getElementById('dateInput');
+        dateInput.value = new Date().toISOString().split('T')[0];
+        dateInput.addEventListener('change', loadSlots);
+
+        async function loadSlots() {
+            const select = document.getElementById('timeInput');
+            try {
+                const res = await fetch(`${API}/slots?date=${dateInput.value}`);
+                const slots = await res.json();
+                select.innerHTML = '';
+                slots.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.time;
+                    opt.textContent = `${s.time} ${s.full ? '(COMPLET)' : ''}`;
+                    if(s.full) opt.classList.add('text-red-400');
+                    select.appendChild(opt);
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        async function book() {
+            const select = document.getElementById('timeInput');
+            const btn = document.getElementById('submitBtn');
+            const fb = document.getElementById('formFeedback');
+            const firstname = document.getElementById('firstname').value || "Client";
+            const email = document.getElementById('email').value || "test@test.com";
+
+            btn.innerHTML = "Traitement...";
+            try {
+                const res = await fetch(`${API}/reserve`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        date: dateInput.value,
+                        time: select.value,
+                        firstname: firstname, lastname: "Form", email: email, party_size: 2
+                    })
+                });
+                const data = await res.json();
+                
+                fb.classList.remove('hidden', 'bg-red-900', 'bg-green-900', 'bg-yellow-900');
+                
+                if(data.action === 'ACCEPT') {
+                    fb.classList.add('bg-green-900/50', 'text-green-200');
+                    fb.innerHTML = `✅ ${data.message}`;
+                    select.classList.remove('bg-yellow-900', 'text-yellow-200', 'border-yellow-500', 'highlight-pulse');
+                    btn.innerHTML = `<span>Confirmer</span> <i data-lucide="check" class="w-5 h-5 ml-2"></i>`;
+                } 
+                else if(data.action === 'ALTERNATIVE') {
+                    fb.classList.add('bg-yellow-900/50', 'text-yellow-200');
+                    fb.innerHTML = `⚠️ ${data.message} <b>${data.slot}</b>.<br>Confirmez-vous ce choix ?`;
+                    
+                    // CORRECTION FORMULAIRE
+                    let opt = select.querySelector(`option[value="${data.slot}"]`);
+                    // Si l'option n'existe pas ou est désactivée, on la recrée/force
+                    if (!opt) {
+                        opt = document.createElement('option');
+                        opt.value = data.slot;
+                        opt.textContent = data.slot + " (Dispo)";
+                        select.appendChild(opt);
+                    }
+                    // Force la sélection après un court délai pour être sûr que le DOM est prêt
+                    setTimeout(() => {
+                        select.value = data.slot;
+                    }, 50);
+
+                    select.classList.add('bg-yellow-900', 'text-yellow-200', 'border-yellow-500', 'highlight-pulse');
+                    setTimeout(() => select.classList.remove('highlight-pulse'), 2000);
+                    btn.innerHTML = `Confirmer ${data.slot} ?`;
+                } 
+                else {
+                    fb.classList.add('bg-red-900/50', 'text-red-200');
+                    fb.innerHTML = `❌ ${data.message}`;
+                }
+            } catch(e) { alert("Erreur"); }
+            lucide.createIcons();
+            loadSlots();
+        }
+
+        // Chat Logic
+        document.addEventListener("DOMContentLoaded", () => { if(window.lucide) lucide.createIcons(); });
+        function toggleChat(forceOpen = false) {
+            const win = document.getElementById('chatWindow');
+            if(forceOpen) win.classList.remove('hidden'); else win.classList.toggle('hidden');
+            if(!win.classList.contains('hidden')) document.getElementById('chatInput').focus();
+        }
+        function handleEnter(e) { if(e.key === 'Enter') sendMessage(); }
+        
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if(!text) return;
+            addMessage(text, 'user');
+            input.value = '';
+            try {
+                const res = await fetch(`${API}/chat`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ message: text, client_id: CLIENT_ID })
+                });
+                const data = await res.json();
+                addMessage(data.response, 'bot');
+            } catch(e) { addMessage("Erreur de connexion.", 'bot'); }
+        }
+
+        function formatMessage(text) {
+            // Remplace **Texte** par <b>Texte</b>
+            return text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+        }
+
+        function addMessage(text, sender) {
+            const msgs = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = sender === 'user' ? "flex justify-end" : "flex items-start gap-2";
+            
+            const formattedText = formatMessage(text); // On applique le formatage
+
+            div.innerHTML = `
+                <div class="${sender === 'user' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-200'} p-3 rounded-xl max-w-[85%] text-sm chat-content">
+                    ${formattedText}
+                </div>
+            `;
+            msgs.appendChild(div);
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+    </script>
+</body>
+</html>

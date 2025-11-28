@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réservation Intelligente - Agent IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }
+        .icon { display: inline-block; width: 24px; height: 24px; margin-right: 8px; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .message-enter { animation: fadeIn 0.3s ease-out; }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 min-h-screen">
+    <div id="app" class="max-w-6xl mx-auto p-6">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center gap-3 mb-2">
+                <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    Réservation Intelligente
+                </h1>
+            </div>
+            <p class="text-gray-600 ml-11">Système d'agent IA autonome pour la gestion des disponibilités</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Formulaire de réservation -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-lg p-8 border border-purple-100">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Nouvelle Réservation
+                    </h2>
+
+                    <!-- Date -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Date</label>
+                        <input
+                            id="dateInput"
+                            type="date"
+                            class="w-full px-4 py-3 border-2 border-purple-200 rounded-lg focus:border-purple-500 focus:outline-none transition"
+                        />
+                    </div>
+
+                    <!-- Créneau horaire -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Créneau souhaité
+                        </label>
+                        <select
+                            id="timeInput"
+                            class="w-full px-4 py-3 border-2 border-purple-200 rounded-lg focus:border-purple-500 focus:outline-none transition"
+                        ></select>
+                    </div>
+
+                    <!-- Nombre de personnes -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 12H9m6 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Nombre de personnes
+                        </label>
+                        <input
+                            id="partySizeInput"
+                            type="number"
+                            min="1"
+                            max="8"
+                            value="2"
+                            class="w-full px-4 py-3 border-2 border-purple-200 rounded-lg focus:border-purple-500 focus:outline-none transition"
+                        />
+                    </div>
+
+                    <!-- Nom du client -->
+                    <div class="mb-8">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Votre nom</label>
+                        <input
+                            id="nameInput"
+                            type="text"
+                            placeholder="Entrez votre nom"
+                            class="w-full px-4 py-3 border-2 border-purple-200 rounded-lg focus:border-purple-500 focus:outline-none transition"
+                        />
+                    </div>
+
+                    <!-- Bouton Réserver -->
+                    <button
+                        id="reserveBtn"
+                        class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-4 rounded-lg hover:shadow-lg transform hover:scale-105 transition cursor-pointer"
+                    >
+                        🚀 Réserver Maintenant
+                    </button>
+
+                    <!-- Zone de messages -->
+                    <div id="messageBox" class="mt-6 p-4 rounded-lg border-l-4 flex items-start gap-3 hidden message-enter">
+                        <svg id="messageIcon" class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"></svg>
+                        <div>
+                            <p id="messageText" class="font-semibold"></p>
+                            <p id="messageReason" class="text-sm text-gray-600 mt-1 hidden"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Résumé du jour -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-pink-100 sticky top-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Planning du <span id="planningDate"></span></h3>
+                    <div id="planningList" class="space-y-2 max-h-96 overflow-y-auto"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // MOTEUR DE GESTION DES RÉSERVATIONS
+        // ============================================================================
+
+        class ReservationEngine {
+            constructor() {
+                this.slots = this.initializeSlots();
+                this.reservations = {};
+            }
+
+            initializeSlots() {
+                const slots = {};
+                const hours = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
+                const maxCapacity = 4;
+
+                hours.forEach(hour => {
+                    slots[hour] = { capacity: maxCapacity, booked: 0, available: maxCapacity };
+                });
+                return slots;
+            }
+
+            getAvailableSlots(date) {
+                if (!this.reservations[date]) {
+                    this.reservations[date] = JSON.parse(JSON.stringify(this.slots));
+                }
+                return this.reservations[date];
+            }
+
+            isSlotAvailable(date, time) {
+                const daySlots = this.getAvailableSlots(date);
+                return daySlots[time] && daySlots[time].available > 0;
+            }
+
+            reserveSlot(date, time, clientName, partySize = 1) {
+                const daySlots = this.getAvailableSlots(date);
+                
+                if (!daySlots[time]) return { success: false, error: 'Créneau invalide' };
+                if (daySlots[time].available < partySize) {
+                    return { success: false, error: `Pas assez de places (${daySlots[time].available} disponible(s))` };
+                }
+
+                daySlots[time].booked += partySize;
+                daySlots[time].available -= partySize;
+                
+                return { success: true, time, date, clientName, partySize };
+            }
+
+            getReservationsForDay(date) {
+                return Object.entries(this.getAvailableSlots(date)).map(([time, slot]) => ({
+                    time,
+                    booked: slot.booked,
+                    capacity: slot.capacity,
+                    available: slot.available
+                }));
+            }
+        }
+
+        // ============================================================================
+        // AGENT IA - RAISONNEMENT ET PRISE DE DÉCISION
+        // ============================================================================
+
+        class IntelligentAgent {
+            constructor(engine) {
+                this.engine = engine;
+            }
+
+            analyzeSlotsIntelligently(date, requestedTime, partySize) {
+                const slots = this.engine.getAvailableSlots(date);
+                const availableSlots = Object.entries(slots)
+                    .filter(([_, slot]) => slot.available >= partySize)
+                    .map(([time, slot]) => ({
+                        time,
+                        available: slot.available,
+                        score: this.calculateSlotScore(time, slot, requestedTime)
+                    }))
+                    .sort((a, b) => b.score - a.score);
+
+                return availableSlots;
+            }
+
+            calculateSlotScore(time, slot, requestedTime) {
+                const requestedHour = parseInt(requestedTime.split(':')[0]);
+                const slotHour = parseInt(time.split(':')[0]);
+                
+                const timeDifference = Math.abs(slotHour - requestedHour);
+                const availabilityFactor = slot.available / slot.capacity;
+                
+                const proximityScore = Math.max(0, 10 - timeDifference);
+                const availabilityScore = availabilityFactor * 5;
+                
+                return proximityScore + availabilityScore;
+            }
+
+            makeDecision(date, time, clientName, partySize) {
+                const reservation = this.engine.reserveSlot(date, time, clientName, partySize);
+                
+                if (reservation.success) {
+                    return {
+                        action: 'RESERVED',
+                        message: `✓ Réservation confirmée pour ${clientName} à ${time}`,
+                        data: reservation,
+                        alternative: null
+                    };
+                }
+
+                const alternatives = this.analyzeSlotsIntelligently(date, time, partySize);
+                
+                if (alternatives.length > 0) {
+                    const bestAlternative = alternatives[0];
+                    const altReservation = this.engine.reserveSlot(date, bestAlternative.time, clientName, partySize);
+                    
+                    if (altReservation.success) {
+                        return {
+                            action: 'ALTERNATIVE_PROPOSED',
+                            message: `Créneau ${time} complet. Alternative proposée : ${bestAlternative.time}`,
+                            data: altReservation,
+                            alternative: {
+                                time: bestAlternative.time,
+                                reason: `Plus proche disponibilité (${bestAlternative.available} places)`
+                            }
+                        };
+                    }
+                }
+
+                return {
+                    action: 'FAILED',
+                    message: `Impossible de réserver à ${time}. Aucun créneau disponible pour ${partySize} personne(s).`,
+                    data: null,
+                    alternative: null
+                };
+            }
+        }
+
+        // ============================================================================
+        // INTERFACE UTILISATEUR
+        // ============================================================================
+
+        const engine = new ReservationEngine();
+        const agent = new IntelligentAgent(engine);
+
+        const dateInput = document.getElementById('dateInput');
+        const timeInput = document.getElementById('timeInput');
+        const partySizeInput = document.getElementById('partySizeInput');
+        const nameInput = document.getElementById('nameInput');
+        const reserveBtn = document.getElementById('reserveBtn');
+        const messageBox = document.getElementById('messageBox');
+        const messageIcon = document.getElementById('messageIcon');
+        const messageText = document.getElementById('messageText');
+        const messageReason = document.getElementById('messageReason');
+        const planningList = document.getElementById('planningList');
+        const planningDate = document.getElementById('planningDate');
+
+        // Initialiser la date
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+        planningDate.textContent = today;
+
+        // Mettre à jour le planning
+        function updatePlanning(date) {
+            const reservations = engine.getReservationsForDay(date);
+            planningList.innerHTML = '';
+
+            reservations.forEach(slot => {
+                const percentage = ((slot.capacity - slot.available) / slot.capacity) * 100;
+                const isAvailable = slot.available > 0;
+                
+                const slotEl = document.createElement('div');
+                slotEl.className = `p-3 rounded-lg transition ${
+                    isAvailable
+                        ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500'
+                        : 'bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500'
+                }`;
+                
+                slotEl.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="font-semibold text-gray-700">${slot.time}</span>
+                        <span class="text-sm font-bold ${isAvailable ? 'text-green-600' : 'text-red-600'}">
+                            ${slot.available}/${slot.capacity}
+                        </span>
+                    </div>
+                    <div class="mt-1 w-full bg-gray-200 rounded-full h-2">
+                        <div
+                            class="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all"
+                            style="width: ${percentage}%"
+                        ></div>
+                    </div>
+                `;
+                planningList.appendChild(slotEl);
+            });
+
+            // Mettre à jour les créneau disponibles
+            timeInput.innerHTML = '';
+            reservations.forEach(slot => {
+                const option = document.createElement('option');
+                option.value = slot.time;
+                option.textContent = `${slot.time} (${slot.available} place${slot.available > 1 ? 's' : ''})`;
+                timeInput.appendChild(option);
+            });
+        }
+
+        // Événement changement de date
+        dateInput.addEventListener('change', (e) => {
+            planningDate.textContent = e.target.value;
+            updatePlanning(e.target.value);
+            messageBox.classList.add('hidden');
+        });
+
+        // Événement réservation
+        reserveBtn.addEventListener('click', () => {
+            const name = nameInput.value.trim();
+            
+            if (!name) {
+                messageText.textContent = '⚠️ Veuillez entrer votre nom';
+                messageIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+                messageIcon.setAttribute('class', 'w-5 h-5 flex-shrink-0 text-yellow-500');
+                messageBox.classList.remove('hidden');
+                return;
+            }
+
+            reserveBtn.disabled = true;
+            reserveBtn.textContent = '⏳ Traitement...';
+            reserveBtn.classList.add('pulse');
+
+            setTimeout(() => {
+                const decision = agent.makeDecision(
+                    dateInput.value,
+                    timeInput.value,
+                    name,
+                    parseInt(partySizeInput.value)
+                );
+
+                const isSuccess = decision.action !== 'FAILED';
+                messageText.textContent = decision.message;
+                messageIcon.innerHTML = isSuccess
+                    ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+                    : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+                messageIcon.setAttribute('class', `w-5 h-5 flex-shrink-0 ${isSuccess ? 'text-green-500' : 'text-red-500'}`);
+
+                if (decision.alternative) {
+                    messageReason.textContent = '📍 ' + decision.alternative.reason;
+                    messageReason.classList.remove('hidden');
+                } else {
+                    messageReason.classList.add('hidden');
+                }
+
+                messageBox.classList.remove('hidden');
+                updatePlanning(dateInput.value);
+
+                if (decision.action === 'RESERVED' || decision.action === 'ALTERNATIVE_PROPOSED') {
+                    nameInput.value = '';
+                }
+
+                reserveBtn.disabled = false;
+                reserveBtn.textContent = '🚀 Réserver Maintenant';
+                reserveBtn.classList.remove('pulse');
+            }, 300);
+        });
+
+        // Entrée clavier
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') reserveBtn.click();
+        });
+
+        // Initialisation
+        updatePlanning(today);
+    </script>
+</body>
+</html>

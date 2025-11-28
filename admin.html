@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-900 text-slate-200 min-h-screen p-8 font-sans">
+    
+    <div class="max-w-6xl mx-auto">
+        <!-- En-tête -->
+        <div class="flex justify-between items-center mb-8 border-b border-slate-700 pb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-white flex items-center gap-2">
+                    <i data-lucide="layout-dashboard" class="text-blue-500"></i> Back-Office Agent
+                </h1>
+                <p class="text-slate-400 mt-1">Gestion des disponibilités et Configuration Globale</p>
+            </div>
+            <div class="bg-green-900/30 text-green-400 border border-green-800 px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Système Actif
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- GAUCHE : TABLEAU DE BORD JOURNALIER -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl flex items-center justify-between">
+                    <h2 class="font-bold text-xl text-white">📅 Planning du jour</h2>
+                    <input type="date" id="adminDate" class="bg-slate-900 border border-slate-600 text-white p-2 rounded-lg focus:border-blue-500 outline-none cursor-pointer">
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden shadow-xl">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-900 text-slate-400 uppercase font-bold">
+                            <tr>
+                                <th class="p-4">Heure</th>
+                                <th class="p-4">Clients (Email)</th>
+                                <th class="p-4 text-center">Réservés</th>
+                                <th class="p-4 text-center">Capacité</th>
+                                <th class="p-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="slotsTable" class="divide-y divide-slate-700">
+                            <tr><td colspan="5" class="p-8 text-center text-slate-500">Chargement...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DROITE : CONFIGURATION GLOBALE -->
+            <div class="space-y-6">
+                <!-- Panneau Horaires -->
+                <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl shadow-xl">
+                    <h2 class="font-bold text-xl text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="settings"></i> Paramètres Généraux
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 font-bold">Ouverture (Heure)</label>
+                            <input type="number" id="confOpen" class="w-full bg-slate-900 border border-slate-600 text-white p-2 rounded mt-1 focus:border-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 font-bold">Fermeture (Heure)</label>
+                            <input type="number" id="confClose" class="w-full bg-slate-900 border border-slate-600 text-white p-2 rounded mt-1 focus:border-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 font-bold">Capacité par défaut</label>
+                            <input type="number" id="confCap" class="w-full bg-slate-900 border border-slate-600 text-white p-2 rounded mt-1 focus:border-blue-500 outline-none">
+                            <p class="text-xs text-slate-500 mt-1">S'applique aux nouveaux jours.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panneau Messages -->
+                <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl shadow-xl">
+                    <h2 class="font-bold text-xl text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="message-square"></i> Réponses Bot
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 font-bold">Message Succès</label>
+                            <textarea id="msgSuccess" class="w-full bg-slate-900 border border-slate-600 text-white p-2 rounded mt-1 text-xs h-16 focus:border-blue-500 outline-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 font-bold">Message Alternative</label>
+                            <textarea id="msgAlt" class="w-full bg-slate-900 border border-slate-600 text-white p-2 rounded mt-1 text-xs h-16 focus:border-blue-500 outline-none"></textarea>
+                        </div>
+                        
+                        <button onclick="saveConfig()" id="saveBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition shadow-lg shadow-blue-600/20 flex justify-center items-center gap-2">
+                            <i data-lucide="save" class="w-4 h-4"></i> Appliquer la Config
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://127.0.0.1:8000/api';
+        const dateInput = document.getElementById('adminDate');
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            dateInput.value = new Date().toISOString().split('T')[0];
+            loadConfig();
+            loadDayDetails();
+        });
+
+        dateInput.addEventListener('change', loadDayDetails);
+
+        // 1. CHARGER LA CONFIG EXISTANTE
+        async function loadConfig() {
+            try {
+                const res = await fetch(`${API}/admin/data`);
+                const data = await res.json();
+                
+                // Remplir les champs
+                document.getElementById('confOpen').value = data.config.opening_hour;
+                document.getElementById('confClose').value = data.config.closing_hour;
+                document.getElementById('confCap').value = data.config.default_capacity;
+                
+                document.getElementById('msgSuccess').value = data.messages.success;
+                document.getElementById('msgAlt').value = data.messages.alternative;
+            } catch(e) {
+                console.error("Erreur chargement config", e);
+            }
+        }
+
+        // 2. SAUVEGARDER LA CONFIG (LE CORRECTIF EST ICI)
+        async function saveConfig() {
+            const btn = document.getElementById('saveBtn');
+            btn.innerHTML = "Sauvegarde...";
+            
+            // On prépare l'objet exactement comme le Python le veut
+            const payload = {
+                opening_hour: parseInt(document.getElementById('confOpen').value),
+                closing_hour: parseInt(document.getElementById('confClose').value),
+                default_capacity: parseInt(document.getElementById('confCap').value),
+                messages: {
+                    success: document.getElementById('msgSuccess').value,
+                    alternative: document.getElementById('msgAlt').value,
+                    failure: "Complet." // Valeur par défaut
+                }
+            };
+
+            try {
+                const res = await fetch(`${API}/admin/config`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert("✅ Configuration sauvegardée avec succès !");
+                    loadDayDetails(); // Rafraichir le tableau pour voir les changements d'horaires
+                } else {
+                    alert("❌ Erreur lors de la sauvegarde.");
+                }
+            } catch(e) {
+                alert("Erreur réseau");
+            }
+            
+            btn.innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> Appliquer la Config`;
+            lucide.createIcons();
+        }
+
+        // 3. CHARGER LES DÉTAILS DU JOUR
+        async function loadDayDetails() {
+            const res = await fetch(`${API}/admin/day_details?date=${dateInput.value}`);
+            const slots = await res.json();
+            const tbody = document.getElementById('slotsTable');
+            tbody.innerHTML = '';
+
+            slots.forEach(slot => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-700/50 transition border-b border-slate-800";
+                
+                // Clients
+                let clientsHtml = '<span class="text-slate-600 italic text-xs">Aucun</span>';
+                if(slot.clients && slot.clients.length > 0) {
+                    clientsHtml = slot.clients.map(c => 
+                        `<div class="text-xs mb-1 bg-slate-800 p-1 rounded border border-slate-700">
+                            <span class="text-blue-300 font-bold">${c.name}</span> 
+                            <span class="text-slate-400 block text-[10px]">${c.email}</span>
+                        </div>`
+                    ).join('');
+                }
+
+                // Couleur Capacité
+                let capClass = "text-slate-400";
+                if(slot.capacity === 0) capClass = "text-red-500 font-bold";
+
+                tr.innerHTML = `
+                    <td class="p-4 font-mono font-bold text-white align-top text-lg">${slot.time}</td>
+                    <td class="p-4 align-top w-1/3">${clientsHtml}</td>
+                    <td class="p-4 text-center align-top">
+                        <div class="flex items-center justify-center gap-2 bg-slate-800 rounded-lg p-1">
+                            <button onclick="updateSlot('${slot.time}', ${slot.booked - 1}, ${slot.capacity})" class="w-6 h-6 hover:bg-slate-700 rounded text-slate-300">-</button>
+                            <span class="font-bold w-6 text-center text-blue-400">${slot.booked}</span>
+                            <button onclick="updateSlot('${slot.time}', ${slot.booked + 1}, ${slot.capacity})" class="w-6 h-6 hover:bg-slate-700 rounded text-slate-300">+</button>
+                        </div>
+                    </td>
+                    <td class="p-4 text-center align-top">
+                        <div class="flex items-center justify-center gap-2 bg-slate-800 rounded-lg p-1">
+                            <button onclick="updateSlot('${slot.time}', ${slot.booked}, ${slot.capacity - 1})" class="w-6 h-6 hover:bg-slate-700 rounded text-slate-300">-</button>
+                            <span class="${capClass} w-6 text-center">${slot.capacity}</span>
+                            <button onclick="updateSlot('${slot.time}', ${slot.booked}, ${slot.capacity + 1})" class="w-6 h-6 hover:bg-slate-700 rounded text-slate-300">+</button>
+                        </div>
+                    </td>
+                    <td class="p-4 text-right align-top">
+                        <button onclick="updateSlot('${slot.time}', 0, ${slot.capacity})" class="text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 px-3 py-1 rounded transition border border-red-900/50">
+                            Vider
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function updateSlot(time, newBooked, newCapacity) {
+            if(newBooked < 0) newBooked = 0;
+            if(newCapacity < 0) newCapacity = 0;
+
+            await fetch(`${API}/admin/update_slot`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    date: dateInput.value,
+                    time: time,
+                    booked: newBooked,
+                    capacity: newCapacity
+                })
+            });
+            loadDayDetails();
+        }
+    </script>
+</body>
+</html>
