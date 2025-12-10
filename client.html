@@ -13,8 +13,8 @@
         .animate-enter { animation: fadeIn 0.5s ease-out forwards; }
         .highlight-pulse { animation: pulseOrange 2s infinite; }
         @keyframes pulseOrange { 0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(234, 179, 8, 0); } 100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); } }
-        /* Style pour le texte gras dans le chat */
         .chat-content b, .chat-content strong { color: #60a5fa; font-weight: 700; }
+        .error-border { border-color: #ef4444 !important; }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-200 min-h-screen relative font-sans overflow-x-hidden">
@@ -30,7 +30,7 @@
         </button>
     </nav>
 
-    <!-- CONTAINER PRINCIPAL -->
+    <!-- CONTAINER -->
     <div class="relative min-h-[80vh]">
         
         <!-- ACCUEIL -->
@@ -71,6 +71,15 @@
                         </select>
                     </div>
                 </div>
+                
+                <div class="mb-5">
+                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Nombre de personnes</label>
+                    <div class="relative">
+                        <i data-lucide="users" class="absolute left-3 top-3.5 w-5 h-5 text-slate-500"></i>
+                        <input type="number" id="partySizeInput" value="2" min="1" max="10" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-3 pl-10 text-white focus:ring-2 focus:ring-blue-500 outline-none mt-1">
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-2 gap-5 mb-5">
                     <input type="text" id="firstname" placeholder="Prénom" class="bg-slate-900 border border-slate-600 rounded-xl p-3 text-white outline-none">
                     <input type="email" id="email" placeholder="Email" class="bg-slate-900 border border-slate-600 rounded-xl p-3 text-white outline-none">
@@ -92,9 +101,9 @@
             </div>
             <div id="chatMessages" class="flex-1 p-4 overflow-y-auto chat-scroll space-y-3 bg-slate-900/50">
                 <div class="flex items-start gap-2">
-                    <div class="bg-slate-700 p-3 rounded-tr-xl rounded-br-xl rounded-bl-xl text-sm text-slate-200">
+                    <div class="bg-slate-700 p-3 rounded-tr-xl rounded-br-xl rounded-bl-xl text-sm text-slate-200 chat-content">
                         Bonjour ! Je suis votre assistant.<br>
-                        Dites-moi : <b>"le 5 a 20h par exemple ou le 5/12/2025 ..."</b>.
+                        Dites-moi : <b>"Je veux une table pour 3 demain à 20h"</b> ou <b>"le 3 à 20h"</b> ou <b>"le 23/12/2025"</b>........
                     </div>
                 </div>
             </div>
@@ -112,7 +121,6 @@
         const API = 'http://127.0.0.1:8000/api';
         const CLIENT_ID = 'client_' + Math.random().toString(36).substr(2, 9);
         
-        // Navigation
         const homeSec = document.getElementById('homeSection');
         const formSec = document.getElementById('formSection');
         function showHome() {
@@ -126,7 +134,6 @@
         }
         function toggleForm() { if (formSec.classList.contains('opacity-0')) showFormView(); else showHome(); }
 
-        // Form Logic
         const dateInput = document.getElementById('dateInput');
         dateInput.value = new Date().toISOString().split('T')[0];
         dateInput.addEventListener('change', loadSlots);
@@ -151,8 +158,22 @@
             const select = document.getElementById('timeInput');
             const btn = document.getElementById('submitBtn');
             const fb = document.getElementById('formFeedback');
-            const firstname = document.getElementById('firstname').value || "Client";
-            const email = document.getElementById('email').value || "test@test.com";
+            const firstname = document.getElementById('firstname').value;
+            const email = document.getElementById('email').value;
+            const partySize = parseInt(document.getElementById('partySizeInput').value) || 2;
+
+            // --- VALIDATION COTE FRONTEND ---
+            if (!firstname || !email) {
+                fb.classList.remove('hidden', 'bg-green-900', 'bg-yellow-900');
+                fb.classList.add('bg-red-900/50', 'text-red-200');
+                fb.innerHTML = `⚠️ Veuillez remplir votre <b>Prénom</b> et <b>Email</b> avant de confirmer.`;
+                if(!firstname) document.getElementById('firstname').classList.add('error-border');
+                if(!email) document.getElementById('email').classList.add('error-border');
+                return; // On arrête tout
+            } else {
+                document.getElementById('firstname').classList.remove('error-border');
+                document.getElementById('email').classList.remove('error-border');
+            }
 
             btn.innerHTML = "Traitement...";
             try {
@@ -160,9 +181,8 @@
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        date: dateInput.value,
-                        time: select.value,
-                        firstname: firstname, lastname: "Form", email: email, party_size: 2
+                        date: dateInput.value, time: select.value,
+                        firstname: firstname, lastname: "Form", email: email, party_size: partySize
                     })
                 });
                 const data = await res.json();
@@ -178,25 +198,17 @@
                 else if(data.action === 'ALTERNATIVE') {
                     fb.classList.add('bg-yellow-900/50', 'text-yellow-200');
                     fb.innerHTML = `⚠️ ${data.message} <b>${data.slot}</b>.<br>Confirmez-vous ce choix ?`;
-                    
-                    // CORRECTION FORMULAIRE
                     let opt = select.querySelector(`option[value="${data.slot}"]`);
-                    // Si l'option n'existe pas ou est désactivée, on la recrée/force
-                    if (!opt) {
-                        opt = document.createElement('option');
-                        opt.value = data.slot;
-                        opt.textContent = data.slot + " (Dispo)";
-                        select.appendChild(opt);
-                    }
-                    // Force la sélection après un court délai pour être sûr que le DOM est prêt
-                    setTimeout(() => {
-                        select.value = data.slot;
-                    }, 50);
-
+                    if (!opt) { opt = document.createElement('option'); opt.value = data.slot; opt.textContent = data.slot + " (Dispo)"; select.appendChild(opt); }
+                    setTimeout(() => { select.value = data.slot; }, 50);
                     select.classList.add('bg-yellow-900', 'text-yellow-200', 'border-yellow-500', 'highlight-pulse');
                     setTimeout(() => select.classList.remove('highlight-pulse'), 2000);
                     btn.innerHTML = `Confirmer ${data.slot} ?`;
                 } 
+                else if(data.action === 'ERROR') {
+                    fb.classList.add('bg-red-900/50', 'text-red-200');
+                    fb.innerHTML = `⚠️ ${data.message}`;
+                }
                 else {
                     fb.classList.add('bg-red-900/50', 'text-red-200');
                     fb.innerHTML = `❌ ${data.message}`;
@@ -206,7 +218,6 @@
             loadSlots();
         }
 
-        // Chat Logic
         document.addEventListener("DOMContentLoaded", () => { if(window.lucide) lucide.createIcons(); });
         function toggleChat(forceOpen = false) {
             const win = document.getElementById('chatWindow');
@@ -214,7 +225,6 @@
             if(!win.classList.contains('hidden')) document.getElementById('chatInput').focus();
         }
         function handleEnter(e) { if(e.key === 'Enter') sendMessage(); }
-        
         async function sendMessage() {
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
@@ -231,24 +241,12 @@
                 addMessage(data.response, 'bot');
             } catch(e) { addMessage("Erreur de connexion.", 'bot'); }
         }
-
-        function formatMessage(text) {
-            // Remplace **Texte** par <b>Texte</b>
-            return text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-        }
-
+        function formatMessage(text) { return text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>'); }
         function addMessage(text, sender) {
             const msgs = document.getElementById('chatMessages');
             const div = document.createElement('div');
             div.className = sender === 'user' ? "flex justify-end" : "flex items-start gap-2";
-            
-            const formattedText = formatMessage(text); // On applique le formatage
-
-            div.innerHTML = `
-                <div class="${sender === 'user' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-200'} p-3 rounded-xl max-w-[85%] text-sm chat-content">
-                    ${formattedText}
-                </div>
-            `;
+            div.innerHTML = `<div class="${sender === 'user' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-200'} p-3 rounded-xl max-w-[85%] text-sm chat-content">${formatMessage(text)}</div>`;
             msgs.appendChild(div);
             msgs.scrollTop = msgs.scrollHeight;
         }

@@ -1,0 +1,246 @@
+{
+    "config": {
+        "opening_hour": 11,
+        "closing_hour": 23,
+        "default_capacity": 10,
+        "peak_hours": [
+            "19:00",
+            "20:00"
+        ]
+    },
+    "messages": {
+        "success": "Ok",
+        "alternative": "Alt",
+        "failure": "Fail"
+    },
+    "reservations": {
+        "2025-12-09": {
+            "11:00": 10,
+            "15:00": 10,
+            "17:00": 10,
+            "12:00": 2,
+            "18:00": 4,
+            "19:00": 7
+        },
+        "2026-01-03": {
+            "22:00": 10,
+            "21:00": 2
+        },
+        "2025-12-15": {},
+        "2025-12-11": {
+            "20:00": 8,
+            "19:00": 0,
+            "22:00": 4,
+            "18:00": 8,
+            "11:00": 8,
+            "12:00": 4,
+            "17:00": 0,
+            "21:00": 3,
+            "15:00": 0,
+            "14:00": 3
+        },
+        "2025-12-10": {
+            "19:00": 0,
+            "18:00": 7,
+            "11:00": 0
+        },
+        "2025-12-17": {}
+    },
+    "overrides": {
+        "2025-12-10": {
+            "19:00": 0,
+            "11:00": 10
+        },
+        "2025-12-11": {
+            "19:00": 0,
+            "17:00": 0,
+            "15:00": 0
+        }
+    },
+    "bookings_details": [
+        {
+            "date": "2026-01-03",
+            "time": "22:00",
+            "name": "mehdi",
+            "email": "me@lll.lllllll",
+            "size": 10,
+            "created_at": "2025-12-09 22:51:08"
+        },
+        {
+            "date": "2026-01-03",
+            "time": "21:00",
+            "name": "Mehdi Form",
+            "email": "tazeroutimehdi@gmail.com",
+            "size": 2,
+            "created_at": "2025-12-09 22:51:32"
+        },
+        {
+            "date": "2025-12-09",
+            "time": "11:00",
+            "name": "Mehdi Form",
+            "email": "memmemmemm@gmail.com",
+            "size": 10,
+            "created_at": "2025-12-09 22:52:06"
+        },
+        {
+            "date": "2025-12-09",
+            "time": "15:00",
+            "name": "hinda Form",
+            "email": "hinda@gmail.com",
+            "size": 10,
+            "created_at": "2025-12-09 22:52:18"
+        },
+        {
+            "date": "2025-12-09",
+            "time": "17:00",
+            "name": "hinda Form",
+            "email": "hinda@gmail.com",
+            "size": 5,
+            "created_at": "2025-12-09 22:52:26"
+        },
+        {
+            "date": "2025-12-09",
+            "time": "17:00",
+            "name": "momo Form",
+            "email": "momo@gmail.com",
+            "size": 3,
+            "created_at": "2025-12-09 22:52:50"
+        },
+        {
+            "date": "2025-12-09",
+            "time": "17:00",
+            "name": "momo Form",
+            "email": "momo@gmail.com",
+            "size": 2,
+            "created_at": "2025-12-09 22:56:35"
+        },
+        {
+            "date": "2025-12-11",
+            "time": "20:00",
+            "name": "mehdi",
+            "email": "mehdi@gmail.com",
+            "size": 3,
+            "created_at": "2025-12-10 00:00:20"
+        },
+        {
+            "date": "2025-12-11",
+            "time": "22:00",
+            "name": "momo",
+            "email": "momo@hotmail.fr",
+            "size": 4,
+            "created_at": "2025-12-10 00:04:57"
+        },
+        {
+            "date": "2025-12-10",
+            "time": "18:00",
+            "name": "Mehdi Form",
+            "email": "tazeroutimehdi@gmail.com",
+            "size": 4,
+            "created_at": "2025-12-10 00:07:28"
+        },
+        {
+            "date": "2025-12-10",
+            "time": "18:00",
+            "name": "hinda Form",
+            "email": "hinda@gmail.com",
+            "size": 3,
+            "created_at": "2025-12-10 00:07:46"
+        },
+        {
+            "date": "2025-12-09",
+            "time": "12:00",
+            "name": "Mehdi Form",
+            "email": "tazeroutimehdi@gmail.com",
+            "size": 2,
+            "created_at": "2025-12-10 00:12:28"
+        },
+        {
+            "date": "2025-12-11",
+            "time": "18:00",
+            "name": "Mehdi Form",
+            "email": "tazeroutimehdi@gmail.com",
+            "size": 4,
+            "created_at": "2025-12-10 00:12:46"
+        },
+        {
+            "date": "2025-12-11",
+            "time": "11:00",
+            "name": "hinda Form",
+            "email": "hinda@gmail.com",
+            "size": 4,
+            "created_at": "2025-12-10 00:13:23"
+        },
+        {
+            "date": "2025-12-11",
+            "time": "11:00",
+            "name": "hinda Form",
+            "email": "hinda@gmail.com",
+            "size": 4,
+            "created_at": "2025-12-10 00:13:33"
+        },
+        {
+            "date": "2025-12-11",
+            "time": "18:00",
+            "name": "Hinda Form",
+            "email": "hinda@gmail.com",
+            "size": 4,
+            "created_at": "2025-12-10 00:14:04"
+        },
+        {
+            "date": "2025-12-09",
+            "time": "18:00",
+            "name": "Mehdi Form",
+            "email": "tazeroutimehdipro@gmail.com",
+            "size": 4,
+            "created_at": "2025-12-10 00:14:28"
+        },
+        {
+            "date": "2025-12-11",
+            "time": "12:00",
+            "name": "Mehdi Form",
+            "email": "tazeroutimehdipro@gmail.com",
+            "size": 4,
+            "created_at": "2025-12-10 00:14:57"
+        },
+        {
+            "date": "2025-12-09",
+            "time": "19:00",
+            "name": "Mehdi Form",
+            "email": "trustmemehdi@gmail.com",
+            "size": 7,
+            "created_at": "2025-12-10 00:15:27"
+        },
+        {
+            "date": "2025-12-11",
+            "time": "20:00",
+            "name": "toto",
+            "email": "toto@gmail.com",
+            "size": 3,
+            "created_at": "2025-12-10 09:29:24"
+        },
+        {
+            "date": "2025-12-11",
+            "time": "20:00",
+            "name": "Mehdi Form",
+            "email": "tazeroutimehdi@gmail.com",
+            "size": 2,
+            "created_at": "2025-12-10 09:33:31"
+        },
+        {
+            "date": "2025-12-11",
+            "time": "21:00",
+            "name": "mehdi",
+            "email": "eeee@gjj.kdd",
+            "size": 3,
+            "created_at": "2025-12-10 11:18:12"
+        },
+        {
+            "date": "2025-12-11",
+            "time": "14:00",
+            "name": "mehdi Form",
+            "email": "tazeroutimehdi@gmail.com",
+            "size": 3,
+            "created_at": "2025-12-10 11:21:15"
+        }
+    ]
+}
